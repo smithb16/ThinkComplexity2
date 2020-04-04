@@ -114,7 +114,9 @@ def make_complete_graph(n):
 
 def reachable_nodes(G, start):
 	"""returns the reachable nodes of G from start node.
-
+	This algorithm performs depth-first-search and is inefficient
+	for most uses.
+	
 	G: networkx.Graph or networkx.DiGraph
 	start: node in G
 	returns: list of nodes seen from start
