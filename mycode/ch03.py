@@ -2,7 +2,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import random
 
+from scipy import spatial
 from collections import deque
 from utils import savefig, decorate
 
@@ -129,6 +131,38 @@ def shortest_path_dijkstra(G, source):
 		new_dist += 1
 	return dist
 
+def all_pairs_shortest_path(G):
+	"""Implements Floyd-Warshal algorithm for unweighted,
+	undirected graphs 'G'. Note that for unweighted undirected
+	graphs, this is not more efficient than running Dijkstra n
+	times.
+
+	G: NetworkX.Graph
+	returns: dist - np.matrix of distances between all vertices
+	"""
+	n = len(G.nodes())
+
+	dist = np.full((n, n), np.inf)
+
+	for u,v in G.edges():
+		dist[u][v] = 1
+
+	for v in G.nodes():
+		dist[v][v] = 0
+
+	for k in range(n):
+		for i in range(n):
+			for j in range(i,n):
+				dist[j][i] = dist[i][j]
+
+				if dist[i][j] > dist[i][k] + dist[k][j]:
+					dist[i][j] = dist[i][k] + dist[k][j]
+
+	print(dist)
+
+	return dist
+
+
 def dijkstra_dfs_bad(G, source):
 	"""Attempts to perform dijkstra algorithm using depth-first search.
 	This does not work.
@@ -250,6 +284,21 @@ def run_one_graph(n, k, p):
 	cc = clustering_coefficient(ws)
 	return mpl, cc
 
+def run_one_graph_spatial(n, k, p):
+
+	"""Makes a WS graph and calculates its stats:
+
+	n: number of nodes
+	k: number of neighbors per node
+	p: probability of node being rewired
+
+	returns: tuple of (mean minimum path length, clustering coefficient)
+	"""
+	sp, positions = make_spatial_graph(n, k, p)
+	mpl = characteristic_path_length(sp)
+	cc = clustering_coefficient(sp)
+	return mpl, cc
+
 def run_experiment(ps, n=1000, k=10, iters=20):
 	"""Evaluates many WS graphs and calculates stats.
 
@@ -264,6 +313,25 @@ def run_experiment(ps, n=1000, k=10, iters=20):
 	for p in ps:
 		print(p)
 		t=[run_one_graph(n, k, p) for _ in range(iters)]
+		means = np.array(t).mean(axis=0)
+		print(means)
+		res.append(means)
+	return np.array(res)
+
+def run_experiment_spatial(ps, n=1000, k=10, iters=20):
+	"""Evaluates many WS graphs and calculates stats.
+
+	ps: iterable (numpy array) of probabilities of rewiring node
+	n: number of nodes
+	k: number of neighbors per node
+	iters: iterations at each probability
+
+	returns: array of (mean min path length, clustering coefficient)
+	"""
+	res = []
+	for p in ps:
+		print(p)
+		t=[run_one_graph_spatial(n, k, p) for _ in range(iters)]
 		means = np.array(t).mean(axis=0)
 		print(means)
 		res.append(means)
@@ -292,44 +360,72 @@ def make_regular_graph(n, k):
 
 	return G
 
+def make_spatial_graph(n, k, p):
+	"""Makes a spatial graph 'n' nodes, each connected to its 'k' 
+	closest neighbors with a random rewiring of edges in proportion to 'p'.
+	In many cases, nodes will have >k neighbors but none will have less.
+
+	n: int - number of nodes
+	k: int - number of neighbors
+	p: float - likelihood of rewiring an edge
+	returns: 
+		sp - graph of nodes
+		positions - dictionary of node : (x,y)
+		"""
+	sp = nx.Graph()
+	positions = {}
+	for node in range(n):
+		x = random.randint(0,1000)
+		y = random.randint(0,1000)
+		positions[node] = (x, y)
+
+	sp.add_nodes_from(positions)
+	tree = spatial.KDTree(list(positions.values()))
+
+	for i in range(len(positions)):
+		[dist, k_closest] = tree.query(tree.data[i], k+1)
+		# print('i: ',i ,'\n',
+		# 	'k_closest: ',k_closest)
+		for j in range(1,k+1):
+			sp.add_edge(k_closest[0], k_closest[j])
+
+	rewire(sp, p)
+	return sp, positions
+
+def plot_ws_experiment(ps, data):
+	L, C = np.transpose(data)
+	print('L\n', L)
+	print('C\n', C)
+	L /= L[0]
+	C /= C[0]
+
+	plt.plot(ps, C, 's-', linewidth=1, label='C(p) / C(0)')
+	plt.plot(ps, L, 'o-', linewidth=1, label='L(p) / L(0)')
+	decorate(xlabel='Rewiring probability (p)', xscale='log',
+			 title='Normalized clustering coefficient and path length',
+			 xlim=[0.00009, 1.1], ylim=[-0.01, 1.01])
+
+	savefig('myfigs/chap03-3')
+	plt.show()
+
 if __name__ == '__main__':
 
+
 	G = make_ring_lattice(10, 4)
-	print('DFS dijkstra algorithm:')
-	print(dijkstra_dfs_bad(G, 0))
+	all_pairs_shortest_path(G)
+	# nx.draw(sp, positions,
+	# 			 node_color='C0', 
+	# 			 node_size=10, 
+	# 			 with_labels=False)
 
-	# nodes = range(8)
-	# while True:
-	# for i in range(5):
-		# print(next(opposite_edges(nodes)))
-		# u, v = next(adjacent_edges(nodes, 1))
-		# print('adjacent: ',u, v)
+	# plt.show()
 
-		# w, x = next(opposite_edges(nodes))
-		# print('opposite: ',w, x)
-
-	## Run Watt-Strogatz experiment
+	# Run Watt-Strogatz experiment
 	# ps = np.logspace(-4, 0, 9)
-	# res = run_experiment(ps)
-	# print('res:\n',res)
+	# data = run_experiment(ps)
+	# print('data:\n',data)
+	# plot_ws_experiment(ps, data)
 
-	# L, C = np.transpose(res)
-	# print('L\n', L)
-	# print('C\n', C)
-	# L /= L[0]
-	# C /= C[0]
-
-	# plt.plot(ps, C, 's-', linewidth=1, label='C(p) / C(0)')
-	# plt.plot(ps, L, 'o-', linewidth=1, label='L(p) / L(0)')
-	# decorate(xlabel='Rewiring probability (p)', xscale='log',
-	# 		 title='Normalized clustering coefficient and path length',
-	# 		 xlim=[0.00009, 1.1], ylim=[-0.01, 1.01])
-
-	# savefig('myfigs/chap03-3')
-
-	# lattice = make_ring_lattice(10, 4)
-	# print('node clustering: ',node_clustering(lattice, 0))
-	# print(clustering_coefficient(lattice))
 
 	# nx.draw_circular(G, 
 	# 			 node_color='C0', 
