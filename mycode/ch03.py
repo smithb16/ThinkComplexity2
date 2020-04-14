@@ -48,9 +48,9 @@ def opposite_edges(nodes):
 
 def make_ring_lattice(n, k):
 	"""Makes a ring lattice with `n` nodes and degree `k`.
-	
+
 	Note: this only works correctly if k is even.
-	
+
 	n: number of nodes
 	k: degree of each node
 	"""
@@ -90,7 +90,7 @@ def flip(p):
 	return np.random.random() < p
 
 def reachable_nodes_bfs(G, start):
-	"""Performs breadth-first search of all nodes in 'G' 
+	"""Performs breadth-first search of all nodes in 'G'
 	reachable from 'start' node.
 
 	G: NetworkX Graph
@@ -341,7 +341,7 @@ def make_regular_graph(n, k):
 	"""Makes a regular graph with `n` nodes and degree `k`.
 
 	Calls make_ring_lattice if k is even.
-	Raises ValueError if both n and k are odd.	
+	Raises ValueError if both n and k are odd.
 
 	n: number of nodes
 	k: degree of each node
@@ -361,14 +361,14 @@ def make_regular_graph(n, k):
 	return G
 
 def make_spatial_graph(n, k, p):
-	"""Makes a spatial graph 'n' nodes, each connected to its 'k' 
+	"""Makes a spatial graph 'n' nodes, each connected to its 'k'
 	closest neighbors with a random rewiring of edges in proportion to 'p'.
 	In many cases, nodes will have >k neighbors but none will have less.
 
 	n: int - number of nodes
 	k: int - number of neighbors
 	p: float - likelihood of rewiring an edge
-	returns: 
+	returns:
 		sp - graph of nodes
 		positions - dictionary of node : (x,y)
 		"""
@@ -413,12 +413,12 @@ if __name__ == '__main__':
 
 	G = make_ring_lattice(10, 4)
 	all_pairs_shortest_path(G)
-	# nx.draw(sp, positions,
-	# 			 node_color='C0', 
-	# 			 node_size=10, 
-	# 			 with_labels=False)
+	nx.draw(G,
+	     node_color='C0',
+	     node_size=10,
+	     with_labels=False)
 
-	# plt.show()
+	plt.show()
 
 	# Run Watt-Strogatz experiment
 	# ps = np.logspace(-4, 0, 9)
@@ -427,9 +427,9 @@ if __name__ == '__main__':
 	# plot_ws_experiment(ps, data)
 
 
-	# nx.draw_circular(G, 
-	# 			 node_color='C0', 
-	# 			 node_size=1000, 
+	# nx.draw_circular(G,
+	# 			 node_color='C0',
+	# 			 node_size=1000,
 	# 			 with_labels=True)
 
 	# savefig('myfigs/chap03-1')
