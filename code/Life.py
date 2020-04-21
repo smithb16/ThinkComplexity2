@@ -23,7 +23,7 @@ ffmpeg.  On Ubuntu and Linux Mint, the following should work.
     sudo apt-get install ffmpeg
 """
 
-from Cell2D import Cell2D, Cell2DViewer
+from Cell2D import Cell2D
 from scipy.signal import correlate2d
 
 
@@ -42,8 +42,8 @@ class Life(Cell2D):
         self.array = self.table[c]
 
 
-class LifeViewer(Cell2DViewer):
-    """Viewer for Game of Life."""
+#class LifeViewer(Cell2DViewer):
+#    """Viewer for Game of Life."""
 
 
 def main(script, *args):
@@ -75,10 +75,8 @@ def main(script, *args):
     life.add_cells(n//2+12, col, *lwss)
     life.add_cells(n//2+26, col, *lwss)
     life.add_cells(n//2+19, col, *bhep)
-    viewer = LifeViewer(life)
-    anim = viewer.animate(frames=100, interval=1)
-    plt.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99)
-    plt.show()
+    #life.animate()
+    life.draw_array()
 
 
 if __name__ == '__main__':
