@@ -11,14 +11,19 @@ class Cell2D:
         self.n = m if n is None else n
         self.array = np.zeros((self.m,self.n), np.uint8)
 
+    def start_random(self, p):
+        m, n = self.array.shape
+        self.array = np.random.choice([1,0], size=(m, n), p=[p, 1-p])
+
     def init_fig(self, **options):
+        m, n = self.array.shape
         options = underride(options,
                             cmap='Greens',
                             alpha=0.7,
                             vmin=0, vmax=1,
                             interpolation='none',
                             origin='upper',
-                            extent=[0, self.n, 0, self.m])
+                            extent=[0, n, 0, m])
 
         self.fig, self.ax = plt.subplots()
         self.im = self.ax.imshow(self.array, **options)
@@ -38,8 +43,8 @@ class Cell2D:
         for i in range(iters):
             self.step()
 
-    def draw(self):
-        self.init_fig()
+    def draw(self, **options):
+        self.init_fig(**options)
         self.im.set_data(self.array)
         return self.fig
 
@@ -49,10 +54,10 @@ class Cell2D:
         y = np.random.randint(0, n-1)
         self.array[y,x] = (self.array[y,x] + 1) % 2
 
-    def animate(self):
-        self.init_fig()
+    def animate(self,**options):
+        self.init_fig(**options)
         ani = FuncAnimation(self.fig, self.__class__.update_anim, fargs=(self,),
-                interval=50)
+                interval=200)
         return ani
 
     def update_anim(frame, self):
