@@ -129,12 +129,12 @@ def trees_vs_time(m, p, f, iters):
     return fig
 
 if __name__ == '__main__':
-    p, f = 0.01, 0.00001
-    #fire = ForestFire(200, p, f)
+    p, f = 0.01, 0.0001
+    fire = ForestFire(200, p, f)
     #fig = trees_vs_time(100, p, f, 1000)
-    fig = plot_fire_scaling(p, f)
+    #fig = plot_fire_scaling(p, f)
 
     options = dict(vmax=3)
-    #ani = fire.animate(**options)
-    savefig('myfigs/fire_scaling_p01f00001.png')
+    ani = fire.animate(**options)
+    #savefig('myfigs/fire_scaling_p01f00001.png')
     plt.show(block=True)

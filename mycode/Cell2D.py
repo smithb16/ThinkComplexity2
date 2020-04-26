@@ -65,6 +65,24 @@ class Cell2D:
         self.step()
         self.im.set_data(self.array)
 
+
+def draw_array(array, **options):
+    """Draws the cells."""
+    n, m = array.shape
+    options = underride(options,
+                        cmap='Greens',
+                        alpha=0.7,
+                        vmin=0, vmax=1,
+                        interpolation='none',
+                        origin='upper',
+                        extent=[0, m, 0, n])
+
+    plt.axis([0, m, 0, n])
+    plt.xticks([])
+    plt.yticks([])
+
+    return plt.imshow(array, **options)
+
 if __name__ == '__main__':
     life = Cell2D(10)
     ani = life.animate()
